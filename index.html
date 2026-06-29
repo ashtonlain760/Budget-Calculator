@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="House Budget">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>House Budget</title>
+<style>
+:root {
+  --bg:#f4f6f8;
+  --card:#fff;
+  --text:#111827;
+  --muted:#6b7280;
+  --line:#e5e7eb;
+  --accent:#111827;
+  --soft:#f3f4f6;
+  --green:#15803d;
+  --red:#b91c1c;
+  --orange:#9a3412;
+  --blue:#2563eb;
+}
+* { box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+header {
+  padding:18px 16px 12px;
+  background:rgba(244,246,248,.96);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+h1 { margin:0; font-size:25px; line-height:1.1; }
+.sub { color:var(--muted); font-size:13px; margin-top:4px; }
+main { max-width:720px; margin:0 auto; padding:12px 12px 96px; }
+.card {
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+  margin:10px 0;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+h2 { margin:0 0 10px; font-size:18px; }
+h3 { margin:12px 0 8px; font-size:15px; }
+label { display:block; margin:10px 0 5px; color:var(--muted); font-size:13px; }
+input, select {
+  width:100%;
+  font-size:16px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+  color:var(--text);
+}
+button {
+  width:100%;
+  border:0;
+  background:var(--accent);
+  color:#fff;
+  border-radius:14px;
+  padding:12px 13px;
+  font-size:15px;
+  font-weight:700;
+}
+button.secondary {
+  background:var(--soft);
+  color:var(--text);
+  border:1px solid var(--line);
+}
+button.danger {
+  background:#fee2e2;
+  color:#991b1b;
+  border:1px solid #fecaca;
+}
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.grid3 {
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+.metric {
+  background:var(--soft);
+  padding:12px;
+  border-radius:15px;
+  min-width:0;
+}
+.metric .label {
+  margin:0 0 4px;
+  color:var(--muted);
+  font-size:12px;
+}
+.metric .value {
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:-.02em;
+}
+.row2 {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.cat {
+  display:grid;
+  grid-template-columns:1fr auto;
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+  gap:8px;
+}
+.cat:last-child { border-bottom:0; }
+.cat small { color:var(--muted); }
+.money { font-variant-numeric:tabular-nums; font-weight:800; }
+.green { color:var(--green); }
+.red { color:var(--red); }
+.orange { color:var(--orange); }
+.blue { color:var(--blue); }
+.bar {
+  height:12px;
+  background:#e5e7eb;
+  border-radius:999px;
+  overflow:hidden;
+  margin:10px 0 5px;
+}
+.fill { height:100%; width:0; background:#111827; }
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+th,td {
+  text-align:left;
+  border-bottom:1px solid var(--line);
+  padding:9px 4px;
+  vertical-align:top;
+}
+th:last-child,td:last-child { text-align:right; }
+.tiny {
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.35;
+}
+.status {
+  padding:10px;
+  border-radius:14px;
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  color:#7c2d12;
+  font-size:13px;
+  line-height:1.35;
+}
+.status.good {
+  background:#ecfdf5;
+  border-color:#bbf7d0;
+  color:#14532d;
+}
+.graphRow { margin:15px 0 18px; }
+.graphTop {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:6px;
+}
+.graphName { font-weight:800; font-size:14px; }
+.graphInfo { color:var(--muted); font-size:12px; text-align:right; line-height:1.25; }
+.track {
+  height:16px;
+  border:1px solid var(--line);
+  background:#f3f4f6;
+  border-radius:999px;
+  overflow:hidden;
+  position:relative;
+}
+.budgetMark {
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  background:rgba(37,99,235,.22);
+  border-right:1px solid rgba(37,99,235,.7);
+}
+.spentFill {
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  background:rgba(21,128,61,.72);
+}
+.spentFill.over {
+  background:rgba(185,28,28,.82);
+}
+.legend {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:10px;
+  font-size:12px;
+  color:var(--muted);
+}
+.legend span { display:inline-flex; gap:6px; align-items:center; }
+.dot { width:10px; height:10px; border-radius:999px; display:inline-block; }
+.dot.blue { background:rgba(37,99,235,.5); }
+.dot.green { background:rgba(21,128,61,.72); }
+.dot.red { background:rgba(185,28,28,.82); }
+.summaryLine {
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid var(--line);
+}
+.summaryLine:last-child { border-bottom:0; }
+.summaryLine div:first-child { color:var(--muted); font-size:13px; }
+.summaryLine div:last-child { font-weight:800; }
+nav {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  z-index:10;
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:4px;
+  padding:8px 6px calc(8px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.96);
+  backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);
+}
+nav button {
+  background:transparent;
+  color:#374151;
+  font-size:12px;
+  padding:9px 2px;
+  border-radius:12px;
+}
+nav button.active {
+  background:#111827;
+  color:#fff;
+}
+.hidden { display:none !important; }
+.toast {
+  position:fixed;
+  left:12px;
+  right:12px;
+  bottom:84px;
+  background:#111827;
+  color:white;
+  padding:12px;
+  border-radius:14px;
+  font-size:14px;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  z-index:20;
+}
+.toast.show { opacity:1; }
+@media (max-width:360px) {
+  .metric .value { font-size:19px; }
+  nav button { font-size:11px; }
+  .grid3 { grid-template-columns:1fr; }
+}
+@media (prefers-color-scheme:dark) {
+  :root {
+    --bg:#0b0f17;
+    --card:#151b24;
+    --text:#f8fafc;
+    --muted:#a1a1aa;
+    --line:#2a3340;
+    --soft:#202938;
+    --accent:#f8fafc;
+    --green:#4ade80;
+    --red:#fb7185;
+    --orange:#fbbf24;
+    --blue:#93c5fd;
+  }
+  header { background:rgba(11,15,23,.96); }
+  input,select { background:#0f172a; color:#f8fafc; border-color:#2a3340; }
+  button { background:#f8fafc; color:#0f172a; }
+  button.secondary { background:#263244; color:#f8fafc; }
+  button.danger { background:#3f1d24; color:#fecdd3; border-color:#7f1d1d; }
+  .bar,.track { background:#0f172a; }
+  nav { background:rgba(21,27,36,.96); }
+  nav button { color:#e5e7eb; }
+  nav button.active { background:#f8fafc; color:#111827; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>House Budget</h1>
+  <div class="sub">$1,235/week • weekly + monthly tracking</div>
+</header>
+
+<main>
+  <section id="dashboard" class="screen">
+    <div id="jsStatus" class="status">If this message does not change to “App ready,” the file is being opened somewhere that blocks app buttons.</div>
+
+    <div class="card">
+      <h2>Button test</h2>
+      <button id="testBtn" type="button">Tap to test buttons</button>
+      <p class="tiny" id="testResult">No tap detected yet.</p>
+    </div>
+
+    <div class="card">
+      <h2>Dashboard</h2>
+      <div class="grid">
+        <div class="metric"><div class="label">Weekly Pay</div><div class="value" id="payView">$1,235</div></div>
+        <div class="metric"><div class="label">House/week</div><div class="value" id="houseWeekView">$325</div></div>
+        <div class="metric"><div class="label">Spent This Week</div><div class="value" id="spentView">$0</div></div>
+        <div class="metric"><div class="label">Flexible Left</div><div class="value" id="leftView">$0</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>House Fund</h2>
+      <div class="grid">
+        <div class="metric"><div class="label">Current Savings</div><div class="value" id="savingsView">$25,000</div></div>
+        <div class="metric"><div class="label">Goal</div><div class="value" id="goalView">$35,000</div></div>
+      </div>
+      <div class="bar"><div class="fill" id="goalFill"></div></div>
+      <p class="tiny" id="goalNote"></p>
+      <button id="addHouseBtn" type="button" class="secondary">Add weekly house savings</button>
+    </div>
+
+    <div class="card">
+      <h2>Weekly Categories</h2>
+      <div id="catList"></div>
+    </div>
+  </section>
+
+  <section id="add" class="screen hidden">
+    <div class="card">
+      <h2>Add purchase</h2>
+      <label for="date">Date</label>
+      <input id="date" type="date">
+      <div class="row2">
+        <div>
+          <label for="amount">Amount</label>
+          <input id="amount" type="number" step="0.01" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div>
+          <label for="category">Category</label>
+          <select id="category">
+            <option>Groceries/Household</option>
+            <option>Gas/Car</option>
+            <option>Fun/Random</option>
+            <option>Buffer</option>
+            <option>Bills</option>
+            <option>House Savings</option>
+          </select>
+        </div>
+      </div>
+      <label for="desc">Description</label>
+      <input id="desc" placeholder="Aldi, gas, dinner, Amazon">
+      <button id="saveEntryBtn" type="button" style="margin-top:12px;">Save purchase</button>
+      <p class="tiny">Tip: entering House Savings here will also increase your current savings total.</p>
+    </div>
+  </section>
+
+  <section id="summary" class="screen hidden">
+    <div class="card">
+      <h2>Weekly Summary</h2>
+      <div class="grid3">
+        <div class="metric"><div class="label">Budgeted</div><div class="value" id="sumBudget">$1,235</div></div>
+        <div class="metric"><div class="label">Spent</div><div class="value" id="sumSpent">$0</div></div>
+        <div class="metric"><div class="label">Unused / Saved</div><div class="value green" id="sumUnused">$1,235</div></div>
+      </div>
+      <p class="tiny">Unused / Saved means money you did not use from the weekly buckets. If it goes negative, that means you overspent the week.</p>
+    </div>
+
+    <div class="card">
+      <h2>Weekly Graph</h2>
+      <p class="tiny">Blue is the weekly budget. Green is what you spent. Red means you went over that category.</p>
+      <div id="weeklyGraph"></div>
+      <div class="legend">
+        <span><i class="dot blue"></i>Budget</span>
+        <span><i class="dot green"></i>Spent</span>
+        <span><i class="dot red"></i>Over budget</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>What happened this week</h2>
+      <div id="weeklyBreakdown"></div>
+    </div>
+  </section>
+
+  <section id="monthly" class="screen hidden">
+    <div class="card">
+      <h2>Monthly Overview</h2>
+      <div class="grid3">
+        <div class="metric"><div class="label">Monthly Budget</div><div class="value" id="monBudget">$0</div></div>
+        <div class="metric"><div class="label">Spent This Month</div><div class="value" id="monSpent">$0</div></div>
+        <div class="metric"><div class="label">Unused / Saved</div><div class="value green" id="monUnused">$0</div></div>
+      </div>
+      <div class="grid3" style="margin-top:8px;">
+        <div class="metric"><div class="label">House Saved</div><div class="value green" id="monHouse">$0</div></div>
+        <div class="metric"><div class="label">Flexible Left</div><div class="value" id="monFlexLeft">$0</div></div>
+        <div class="metric"><div class="label">Savings Rate</div><div class="value" id="monSaveRate">0%</div></div>
+      </div>
+      <p class="tiny">Monthly budget uses your weekly plan × 4.33. This keeps the weekly budget as the main control, while giving you the bigger monthly picture.</p>
+    </div>
+
+    <div class="card">
+      <h2>Monthly Graph</h2>
+      <p class="tiny">Blue is the monthly target. Green is what you spent this month. Red means you are over the monthly target for that category.</p>
+      <div id="monthlyGraph"></div>
+      <div class="legend">
+        <span><i class="dot blue"></i>Monthly target</span>
+        <span><i class="dot green"></i>Spent</span>
+        <span><i class="dot red"></i>Over target</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>What happened this month</h2>
+      <div id="monthlyBreakdown"></div>
+    </div>
+  </section>
+
+
+  <section id="log" class="screen hidden">
+    <div class="card">
+      <h2>Recent Entries</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Category</th><th>Amount</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Backup</h2>
+      <button id="exportBtn" type="button" class="secondary">Export backup</button>
+      <p class="tiny">This downloads your entries and settings as a JSON backup file.</p>
+    </div>
+  </section>
+
+  <section id="settings" class="screen hidden">
+    <div class="card">
+      <h2>Weekly Plan</h2>
+      <p class="tiny">Change these only if you want to adjust the weekly budget amounts.</p>
+      <div id="planInputs"></div>
+      <button id="savePlanBtn" type="button" style="margin-top:12px;">Save plan</button>
+    </div>
+
+    <div class="card">
+      <h2>Settings</h2>
+      <label for="setPay">Weekly take-home pay</label>
+      <input id="setPay" type="number" step="1">
+      <label for="setSavings">Current savings</label>
+      <input id="setSavings" type="number" step="1">
+      <label for="setGoal">Target savings</label>
+      <input id="setGoal" type="number" step="1">
+      <label for="setFloor">Emergency floor</label>
+      <input id="setFloor" type="number" step="1">
+      <button id="saveSettingsBtn" type="button" style="margin-top:12px;">Save settings</button>
+    </div>
+
+    <div class="card">
+      <h2>Reset</h2>
+      <button id="resetBtn" type="button" class="danger">Reset all app data</button>
+      <p class="tiny">This only clears this app’s saved data in this browser/device.</p>
+    </div>
+  </section>
+</main>
+
+<nav>
+  <button type="button" data-tab="dashboard" class="active">Home</button>
+  <button type="button" data-tab="add">Add</button>
+  <button type="button" data-tab="summary">Week</button>
+  <button type="button" data-tab="monthly">Month</button>
+  <button type="button" data-tab="log">Log</button>
+  <button type="button" data-tab="settings">Plan</button>
+</nav>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  const KEY = "houseBudgetAppV3";
+  const DEFAULTS = {
+    settings: {
+      pay: 1235,
+      savings: 25000,
+      goal: 35000,
+      floor: 15000
+    },
+    plan: {
+      "Bills": 437,
+      "House Savings": 325,
+      "Groceries/Household": 160,
+      "Gas/Car": 70,
+      "Fun/Random": 140,
+      "Buffer": 103
+    },
+    entries: []
+  };
+
+  let state = loadState();
+
+  function $(id){ return document.getElementById(id); }
+  function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+
+  function loadState(){
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return clone(DEFAULTS);
+      const parsed = JSON.parse(raw);
+      return {
+        settings: Object.assign(clone(DEFAULTS.settings), parsed.settings || {}),
+        plan: Object.assign(clone(DEFAULTS.plan), parsed.plan || {}),
+        entries: Array.isArray(parsed.entries) ? parsed.entries : []
+      };
+    } catch(e) {
+      return clone(DEFAULTS);
+    }
+  }
+
+  function saveState(){
+    localStorage.setItem(KEY, JSON.stringify(state));
+    render();
+  }
+
+  function money(n){
+    n = Number(n || 0);
+    const sign = n < 0 ? "-" : "";
+    return sign + "$" + Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:0});
+  }
+
+  function money2(n){
+    n = Number(n || 0);
+    const sign = n < 0 ? "-" : "";
+    return sign + "$" + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function toast(msg){
+    const t = $("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(function(){ t.classList.remove("show"); }, 1800);
+  }
+
+  function todayISO(){
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0,10);
+  }
+
+  function startOfWeek(){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() - d.getDay());
+    return d;
+  }
+
+  function isThisWeek(entry){
+    const start = startOfWeek();
+    const end = new Date(start);
+    end.setDate(end.getDate()+7);
+    const d = new Date(entry.date + "T12:00:00");
+    return d >= start && d < end;
+  }
+
+  function entriesThisWeek(){
+    return state.entries.filter(isThisWeek);
+  }
+
+  function startOfMonth(){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    d.setDate(1);
+    return d;
+  }
+
+  function isThisMonth(entry){
+    const start = startOfMonth();
+    const end = new Date(start);
+    end.setMonth(end.getMonth()+1);
+    const d = new Date(entry.date + "T12:00:00");
+    return d >= start && d < end;
+  }
+
+  function entriesThisMonth(){
+    return state.entries.filter(isThisMonth);
+  }
+
+  function totalForMonth(cat){
+    return entriesThisMonth()
+      .filter(function(e){ return e.category === cat; })
+      .reduce(function(sum, e){ return sum + Number(e.amount || 0); }, 0);
+  }
+
+  function totalFor(cat){
+    return entriesThisWeek()
+      .filter(function(e){ return e.category === cat; })
+      .reduce(function(sum, e){ return sum + Number(e.amount || 0); }, 0);
+  }
+
+  function allBudgetCats(){
+    return Object.keys(state.plan);
+  }
+
+  function flexibleCategories(){
+    return ["Groceries/Household", "Gas/Car", "Fun/Random", "Buffer"];
+  }
+
+  function flexibleBudget(){
+    return flexibleCategories().reduce(function(sum, cat){ return sum + Number(state.plan[cat] || 0); }, 0);
+  }
+
+  function flexibleSpent(){
+    return flexibleCategories().reduce(function(sum, cat){ return sum + totalFor(cat); }, 0);
+  }
+
+  function weeklyBudgetTotal(){
+    return allBudgetCats().reduce(function(sum, cat){ return sum + Number(state.plan[cat] || 0); }, 0);
+  }
+
+  function weeklySpentTotal(){
+    return allBudgetCats().reduce(function(sum, cat){ return sum + totalFor(cat); }, 0);
+  }
+
+  function monthlyBudgetTotal(){
+    return weeklyBudgetTotal() * 4.33;
+  }
+
+  function monthlySpentTotal(){
+    return allBudgetCats().reduce(function(sum, cat){ return sum + totalForMonth(cat); }, 0);
+  }
+
+  function monthlyFlexibleBudget(){
+    return flexibleBudget() * 4.33;
+  }
+
+  function monthlyFlexibleSpent(){
+    return flexibleCategories().reduce(function(sum, cat){ return sum + totalForMonth(cat); }, 0);
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]);
+    });
+  }
+
+  function renderDashboard(){
+    $("date").value = $("date").value || todayISO();
+    $("payView").textContent = money(state.settings.pay);
+    $("houseWeekView").textContent = money(state.plan["House Savings"]);
+    $("spentView").textContent = money(flexibleSpent());
+    $("leftView").textContent = money(flexibleBudget() - flexibleSpent());
+    $("savingsView").textContent = money(state.settings.savings);
+    $("goalView").textContent = money(state.settings.goal);
+
+    const pct = state.settings.goal ? Math.max(0, Math.min(100, state.settings.savings / state.settings.goal * 100)) : 0;
+    $("goalFill").style.width = pct + "%";
+    const toGo = Math.max(0, state.settings.goal - state.settings.savings);
+    const weeks = state.plan["House Savings"] ? Math.ceil(toGo / state.plan["House Savings"]) : 0;
+    $("goalNote").textContent = toGo > 0 ? money(toGo) + " left. At " + money(state.plan["House Savings"]) + "/week, about " + weeks + " weeks." : "Goal reached.";
+
+    const cats = $("catList");
+    cats.innerHTML = "";
+    allBudgetCats().forEach(function(cat){
+      const used = totalFor(cat);
+      const left = Number(state.plan[cat] || 0) - used;
+      cats.innerHTML += '<div class="cat"><div><b>' + escapeHtml(cat) + '</b><br><small>Budget ' + money(state.plan[cat]) + ' • Used ' + money2(used) + '</small></div><div class="money ' + (left < 0 ? 'red' : 'green') + '">' + money2(left) + '</div></div>';
+    });
+  }
+
+  function renderSummary(){
+    const budget = weeklyBudgetTotal();
+    const spent = weeklySpentTotal();
+    const unused = budget - spent;
+
+    $("sumBudget").textContent = money(budget);
+    $("sumSpent").textContent = money(spent);
+    $("sumUnused").textContent = money(unused);
+    $("sumUnused").className = "value " + (unused >= 0 ? "green" : "red");
+
+    const graph = $("weeklyGraph");
+    graph.innerHTML = "";
+    allBudgetCats().forEach(function(cat){
+      const budgetCat = Number(state.plan[cat] || 0);
+      const spentCat = totalFor(cat);
+      const left = budgetCat - spentCat;
+      const maxVal = Math.max(budgetCat, spentCat, 1);
+      const budgetPct = Math.min(100, (budgetCat / maxVal) * 100);
+      const spentPct = Math.min(100, (spentCat / maxVal) * 100);
+      const over = spentCat > budgetCat;
+
+      const div = document.createElement("div");
+      div.className = "graphRow";
+      div.innerHTML =
+        '<div class="graphTop">' +
+          '<div class="graphName">' + escapeHtml(cat) + '</div>' +
+          '<div class="graphInfo">Budget ' + money(budgetCat) + '<br>Spent ' + money2(spentCat) + ' · ' + (left >= 0 ? money2(left) + " left" : money2(Math.abs(left)) + " over") + '</div>' +
+        '</div>' +
+        '<div class="track">' +
+          '<div class="budgetMark" style="width:' + budgetPct + '%"></div>' +
+          '<div class="spentFill ' + (over ? 'over' : '') + '" style="width:' + spentPct + '%"></div>' +
+        '</div>';
+      graph.appendChild(div);
+    });
+
+    let bestCat = "None", bestLeft = -Infinity, worstCat = "None", worstOver = 0;
+    allBudgetCats().forEach(function(cat){
+      const left = Number(state.plan[cat] || 0) - totalFor(cat);
+      if (left > bestLeft) { bestLeft = left; bestCat = cat; }
+      if (left < 0 && Math.abs(left) > worstOver) { worstOver = Math.abs(left); worstCat = cat; }
+    });
+
+    $("weeklyBreakdown").innerHTML =
+      '<div class="summaryLine"><div>Total weekly budget</div><div>' + money(budget) + '</div></div>' +
+      '<div class="summaryLine"><div>Total spent this week</div><div>' + money2(spent) + '</div></div>' +
+      '<div class="summaryLine"><div>Unused / saved this week</div><div class="' + (unused >= 0 ? 'green' : 'red') + '">' + money2(unused) + '</div></div>' +
+      '<div class="summaryLine"><div>Best category</div><div class="green">' + escapeHtml(bestCat) + '</div></div>' +
+      '<div class="summaryLine"><div>Most over budget</div><div class="' + (worstCat === "None" ? '' : 'red') + '">' + escapeHtml(worstCat) + '</div></div>';
+  }
+
+
+  function renderMonthly(){
+    const budget = monthlyBudgetTotal();
+    const spent = monthlySpentTotal();
+    const unused = budget - spent;
+    const houseSaved = totalForMonth("House Savings");
+    const flexLeft = monthlyFlexibleBudget() - monthlyFlexibleSpent();
+    const saveRate = budget ? Math.max(0, (unused / budget) * 100) : 0;
+
+    $("monBudget").textContent = money(budget);
+    $("monSpent").textContent = money2(spent);
+    $("monUnused").textContent = money2(unused);
+    $("monUnused").className = "value " + (unused >= 0 ? "green" : "red");
+    $("monHouse").textContent = money2(houseSaved);
+    $("monFlexLeft").textContent = money2(flexLeft);
+    $("monFlexLeft").className = "value " + (flexLeft >= 0 ? "green" : "red");
+    $("monSaveRate").textContent = Math.max(0, saveRate).toFixed(0) + "%";
+
+    const graph = $("monthlyGraph");
+    graph.innerHTML = "";
+    allBudgetCats().forEach(function(cat){
+      const budgetCat = Number(state.plan[cat] || 0) * 4.33;
+      const spentCat = totalForMonth(cat);
+      const left = budgetCat - spentCat;
+      const maxVal = Math.max(budgetCat, spentCat, 1);
+      const budgetPct = Math.min(100, (budgetCat / maxVal) * 100);
+      const spentPct = Math.min(100, (spentCat / maxVal) * 100);
+      const over = spentCat > budgetCat;
+
+      const div = document.createElement("div");
+      div.className = "graphRow";
+      div.innerHTML =
+        '<div class="graphTop">' +
+          '<div class="graphName">' + escapeHtml(cat) + '</div>' +
+          '<div class="graphInfo">Target ' + money(budgetCat) + '<br>Spent ' + money2(spentCat) + ' · ' + (left >= 0 ? money2(left) + " left" : money2(Math.abs(left)) + " over") + '</div>' +
+        '</div>' +
+        '<div class="track">' +
+          '<div class="budgetMark" style="width:' + budgetPct + '%"></div>' +
+          '<div class="spentFill ' + (over ? 'over' : '') + '" style="width:' + spentPct + '%"></div>' +
+        '</div>';
+      graph.appendChild(div);
+    });
+
+    let bestCat = "None", bestLeft = -Infinity, worstCat = "None", worstOver = 0;
+    allBudgetCats().forEach(function(cat){
+      const left = (Number(state.plan[cat] || 0) * 4.33) - totalForMonth(cat);
+      if (left > bestLeft) { bestLeft = left; bestCat = cat; }
+      if (left < 0 && Math.abs(left) > worstOver) { worstOver = Math.abs(left); worstCat = cat; }
+    });
+
+    $("monthlyBreakdown").innerHTML =
+      '<div class="summaryLine"><div>Monthly budget target</div><div>' + money(budget) + '</div></div>' +
+      '<div class="summaryLine"><div>Total spent this month</div><div>' + money2(spent) + '</div></div>' +
+      '<div class="summaryLine"><div>Unused / saved this month</div><div class="' + (unused >= 0 ? 'green' : 'red') + '">' + money2(unused) + '</div></div>' +
+      '<div class="summaryLine"><div>House savings this month</div><div class="green">' + money2(houseSaved) + '</div></div>' +
+      '<div class="summaryLine"><div>Flexible spending left</div><div class="' + (flexLeft >= 0 ? 'green' : 'red') + '">' + money2(flexLeft) + '</div></div>' +
+      '<div class="summaryLine"><div>Best category this month</div><div class="green">' + escapeHtml(bestCat) + '</div></div>' +
+      '<div class="summaryLine"><div>Most over monthly target</div><div class="' + (worstCat === "None" ? '' : 'red') + '">' + escapeHtml(worstCat) + '</div></div>';
+  }
+
+
+  function renderLog(){
+    const recent = state.entries.slice(-20).reverse();
+    $("rows").innerHTML = recent.map(function(e){
+      return '<tr><td>' + escapeHtml(e.date) + '</td><td>' + escapeHtml(e.category) + '<br><span class="tiny">' + escapeHtml(e.desc || '') + '</span></td><td>' + money2(e.amount) + '</td></tr>';
+    }).join("") || '<tr><td colspan="3" class="tiny">No entries yet.</td></tr>';
+  }
+
+  function renderPlan(){
+    const p = $("planInputs");
+    p.innerHTML = "";
+    allBudgetCats().forEach(function(cat){
+      const wrap = document.createElement("div");
+      wrap.innerHTML = '<label>' + escapeHtml(cat) + '</label><input data-plan="' + escapeHtml(cat) + '" type="number" step="1" value="' + Number(state.plan[cat] || 0) + '">';
+      p.appendChild(wrap);
+    });
+
+    $("setPay").value = state.settings.pay;
+    $("setSavings").value = state.settings.savings;
+    $("setGoal").value = state.settings.goal;
+    $("setFloor").value = state.settings.floor;
+  }
+
+  function render(){
+    renderDashboard();
+    renderSummary();
+    renderMonthly();
+    renderLog();
+    renderPlan();
+  }
+
+  function showScreen(id){
+    document.querySelectorAll(".screen").forEach(function(s){ s.classList.add("hidden"); });
+    $(id).classList.remove("hidden");
+    document.querySelectorAll("nav button").forEach(function(b){ b.classList.toggle("active", b.dataset.tab === id); });
+    render();
+  }
+
+  function addEntry(){
+    const amount = Number($("amount").value);
+    if (!amount || amount <= 0) {
+      alert("Enter an amount.");
+      return;
+    }
+    const entry = {
+      date: $("date").value || todayISO(),
+      amount: amount,
+      category: $("category").value,
+      desc: $("desc").value
+    };
+    state.entries.push(entry);
+    if (entry.category === "House Savings") {
+      state.settings.savings += amount;
+    }
+    $("amount").value = "";
+    $("desc").value = "";
+    saveState();
+    showScreen("dashboard");
+    toast("Purchase saved.");
+  }
+
+  function addHouseSavings(){
+    const amount = Number(state.plan["House Savings"] || 0);
+    state.entries.push({
+      date: todayISO(),
+      amount: amount,
+      category: "House Savings",
+      desc: "Weekly transfer"
+    });
+    state.settings.savings += amount;
+    saveState();
+    toast("House savings added.");
+  }
+
+  function savePlan(){
+    document.querySelectorAll("[data-plan]").forEach(function(inp){
+      state.plan[inp.dataset.plan] = Number(inp.value || 0);
+    });
+    saveState();
+    showScreen("dashboard");
+    toast("Plan saved.");
+  }
+
+  function saveSettings(){
+    state.settings.pay = Number($("setPay").value || 0);
+    state.settings.savings = Number($("setSavings").value || 0);
+    state.settings.goal = Number($("setGoal").value || 0);
+    state.settings.floor = Number($("setFloor").value || 0);
+    saveState();
+    showScreen("dashboard");
+    toast("Settings saved.");
+  }
+
+  function exportBackup(){
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "house-budget-backup.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  function resetAll(){
+    if (confirm("Reset all app data?")) {
+      state = clone(DEFAULTS);
+      saveState();
+      toast("Reset complete.");
+    }
+  }
+
+  function wire(){
+    $("jsStatus").textContent = "App ready — JavaScript is running. Buttons should work in this browser.";
+    $("jsStatus").classList.add("good");
+
+    document.querySelectorAll("nav button").forEach(function(btn){
+      btn.addEventListener("click", function(){ showScreen(btn.dataset.tab); });
+    });
+
+    $("testBtn").addEventListener("click", function(){
+      $("testResult").textContent = "Button tap detected. This browser can run the app.";
+      toast("Buttons work.");
+    });
+
+    $("saveEntryBtn").addEventListener("click", addEntry);
+    $("addHouseBtn").addEventListener("click", addHouseSavings);
+    $("savePlanBtn").addEventListener("click", savePlan);
+    $("saveSettingsBtn").addEventListener("click", saveSettings);
+    $("exportBtn").addEventListener("click", exportBackup);
+    $("resetBtn").addEventListener("click", resetAll);
+
+    render();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wire);
+  } else {
+    wire();
+  }
+})();
+</script>
+</body>
+</html>
